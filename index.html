@@ -1,0 +1,787 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>돈 모으고 가챠</title>
+
+<style>
+:root{
+ --red:#f45e59;
+ --orange:#ffa24c;
+ --bg:#fff3e8;
+ --text:#49382f;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:"Malgun Gothic",Arial,sans-serif;
+ background:linear-gradient(135deg,#fff1e5,#ffdfd0);
+ color:var(--text);
+ min-height:100vh;
+}
+header{
+ background:linear-gradient(120deg,var(--red),var(--orange));
+ color:white;
+ text-align:center;
+ padding:27px 12px 20px;
+}
+header h1{margin:0;font-size:30px}
+header p{margin:10px 0}
+nav{
+ display:flex;
+ justify-content:center;
+ gap:9px;
+ margin-top:20px;
+ flex-wrap:wrap;
+}
+button{
+ font:inherit;
+ font-weight:bold;
+ cursor:pointer;
+ border:0;
+ border-radius:13px;
+}
+button:disabled{opacity:.5;cursor:not-allowed}
+.nav{
+ background:#ffffff40;
+ color:white;
+ padding:13px 24px;
+}
+.nav.active{background:white;color:#e85b4c}
+main{
+ max-width:950px;
+ margin:25px auto;
+ padding:0 15px 45px;
+}
+.page{display:none}
+.page.active{display:block}
+.card{
+ background:white;
+ border-radius:23px;
+ padding:24px;
+ margin-bottom:20px;
+ box-shadow:0 7px 25px #9d55391a;
+}
+h2{color:#e65c4a;margin-top:0}
+.stats{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:11px;
+ margin-bottom:20px;
+}
+.stat{
+ background:white;
+ border-radius:18px;
+ padding:19px 7px;
+ text-align:center;
+}
+.stat strong{
+ display:block;
+ font-size:23px;
+ color:#ed6150;
+ margin-top:9px;
+}
+input{
+ width:100%;
+ border:2px solid #f5d6c4;
+ border-radius:13px;
+ padding:15px;
+ font-size:18px;
+ margin:12px 0;
+}
+.primary{
+ background:linear-gradient(120deg,var(--red),var(--orange));
+ color:white;
+ padding:15px;
+ width:100%;
+ font-size:17px;
+}
+.message{
+ color:#df574b;
+ font-weight:bold;
+ margin-top:13px;
+ min-height:24px;
+}
+.grid4{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:12px;
+}
+.ticket,.option{
+ background:#fff3e8;
+ border:2px solid #f5dfcf;
+ border-radius:17px;
+ padding:16px 8px;
+ text-align:center;
+}
+.ticket strong,.option strong{
+ display:block;
+ margin:9px 0;
+}
+.ticket strong{font-size:24px}
+.option.selected{
+ border-color:#f45e59;
+ background:#ffeadf;
+}
+.small{font-size:12px;color:#88756a}
+.history{
+ list-style:none;
+ padding:0;
+ max-height:250px;
+ overflow:auto;
+}
+.history li{
+ padding:12px 3px;
+ border-bottom:1px solid #f1e4da;
+ display:flex;
+ justify-content:space-between;
+ gap:10px;
+}
+.stage{
+ text-align:center;
+ background:linear-gradient(#fff2df,#ffe0ca);
+ border-radius:22px;
+ padding:26px 12px;
+ margin:20px 0;
+}
+.stage img{
+ width:210px;
+ height:210px;
+ object-fit:contain;
+ animation:pop .45s ease;
+}
+.placeholder{
+ height:210px;
+ font-size:100px;
+ display:grid;
+ place-items:center;
+}
+@keyframes pop{
+ 0%{transform:scale(.4);opacity:0}
+ 70%{transform:scale(1.12)}
+ 100%{transform:scale(1);opacity:1}
+}
+.prob{
+ width:100%;
+ border-collapse:collapse;
+ text-align:center;
+ font-size:13px;
+}
+.prob th,.prob td{
+ padding:12px 5px;
+ border-bottom:1px solid #f0e2d8;
+}
+.prob th{background:#fff1e5}
+.collection{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:13px;
+}
+.character-card{
+ background:#fff5e9;
+ border:2px solid #f3dfd0;
+ border-radius:17px;
+ text-align:center;
+ padding:15px 7px;
+}
+.character-card img{
+ width:100%;
+ height:135px;
+ object-fit:contain;
+}
+.character-card.locked{
+ background:#f4f2ee;
+}
+.character-card.locked img{
+ filter:brightness(0);
+ opacity:1;
+}
+.char-name{
+ font-weight:bold;
+ margin:9px 0 5px;
+ overflow-wrap:anywhere;
+}
+.progress{
+ background:#f5e3d6;
+ height:15px;
+ border-radius:20px;
+ overflow:hidden;
+}
+.progress-fill{
+ background:linear-gradient(90deg,#f65d58,#ffad50);
+ width:0;
+ height:100%;
+ transition:width .3s;
+}
+.notice{
+ background:#fff0df;
+ padding:15px;
+ border-radius:13px;
+ font-size:13px;
+ line-height:1.8;
+}
+@media(max-width:600px){
+ header h1{font-size:25px}
+ .grid4,.collection{grid-template-columns:repeat(2,1fr)}
+ .stat{font-size:12px;padding:14px 4px}
+ .stat strong{font-size:17px}
+ .card{padding:17px}
+ .stage img{width:170px;height:170px}
+ .prob{font-size:11px}
+ .prob th,.prob td{padding:10px 3px}
+}
+</style>
+</head>
+
+<body>
+<header>
+<h1>🐷 돈 모으고 가챠 🎁</h1>
+<p>저축하고 뽑고, 나만의 도감을 완성하자!</p>
+<nav>
+<button class="nav active" data-page="saving">💰 저축</button>
+<button class="nav" data-page="gacha">🎁 뽑기</button>
+<button class="nav" data-page="collection">📖 도감</button>
+</nav>
+</header>
+
+<main>
+<div class="stats">
+ <div class="stat">💰 총 저축액<strong id="totalMoney">0원</strong></div>
+ <div class="stat">🎟️ 뽑기권<strong id="totalTickets">0장</strong></div>
+ <div class="stat">📖 수집 도감<strong id="collectionCount">0/0</strong></div>
+</div>
+
+<section id="saving" class="page active">
+ <div class="card">
+  <h2>💰 저축하기</h2>
+  <p>저축한 금액을 입력하면 뽑기권 1장을 받아요!</p>
+  <label for="amount">저축 금액 (원)</label>
+  <input id="amount" type="number" min="1" step="1" placeholder="예: 3000">
+  <button class="primary" id="saveBtn">🐷 저축 기록하기</button>
+  <div id="saveMessage" class="message" role="status"></div>
+ </div>
+ <div class="card">
+  <h2>🎟️ 보유 뽑기권</h2>
+  <div id="ticketSummary" class="grid4"></div>
+ </div>
+ <div class="card">
+  <h2>📋 저축 기록</h2>
+  <ul id="history" class="history"></ul>
+ </div>
+</section>
+
+<section id="gacha" class="page">
+ <div class="card">
+  <h2>🎁 캐릭터 뽑기</h2>
+  <p>사용할 뽑기권을 선택하세요!</p>
+  <div id="gachaOptions" class="grid4"></div>
+
+  <div class="stage">
+   <div id="resultImage" class="placeholder">🎁</div>
+   <h2 id="resultName">어떤 친구가 나올까요?</h2>
+   <p id="resultGrade">두근두근!</p>
+  </div>
+
+  <button class="primary" id="drawBtn">✨ 캐릭터 뽑기!</button>
+  <div id="gachaMessage" class="message" role="status"></div>
+ </div>
+
+ <div class="card">
+  <h2>📊 뽑기권별 등장 확률</h2>
+  <table class="prob">
+   <thead>
+    <tr>
+     <th>뽑기권</th><th>보통</th><th>희귀</th>
+     <th>좋은</th><th>전설</th>
+    </tr>
+   </thead>
+   <tbody>
+    <tr><th>🥉 보통</th><td>75%</td><td>20%</td><td>4%</td><td>1%</td></tr>
+    <tr><th>🥈 희귀</th><td>45%</td><td>35%</td><td>15%</td><td>5%</td></tr>
+    <tr><th>🥇 좋은</th><td>20%</td><td>30%</td><td>35%</td><td>15%</td></tr>
+    <tr><th>👑 전설</th><td>5%</td><td>15%</td><td>30%</td><td>50%</td></tr>
+   </tbody>
+  </table>
+  <p class="small">
+   해당 등급의 이미지가 없으면 다른 등록된 등급에 확률이 비례 배분됩니다.
+  </p>
+ </div>
+</section>
+
+<section id="collection" class="page">
+ <div class="card">
+  <h2>📖 캐릭터 도감</h2>
+  <p id="progressText">0/0 발견</p>
+  <div class="progress"><div id="progressFill" class="progress-fill"></div></div>
+ </div>
+ <div class="card">
+  <div id="collectionGrid" class="collection"></div>
+ </div>
+</section>
+</main>
+
+<script>
+"use strict";
+
+// ========================================
+// 1. 기본 설정
+// ========================================
+
+const TYPES=[
+ {name:"보통",icon:"🥉",min:1,max:1000},
+ {name:"희귀",icon:"🥈",min:1001,max:3000},
+ {name:"좋은",icon:"🥇",min:3001,max:5000},
+ {name:"전설",icon:"👑",min:5001,max:Infinity}
+];
+
+const PROBABILITIES=[
+ [75,20,4,1],
+ [45,35,15,5],
+ [20,30,35,15],
+ [5,15,30,50]
+];
+
+const STORAGE_KEY="moneyGachaJsonV1";
+
+let data=loadData();
+let characters=[];
+let selectedType=0;
+let imagesReady=false;
+
+// ========================================
+// 2. 데이터 관리
+// ========================================
+
+function emptyData(){
+ return {total:0,tickets:[0,0,0,0],owned:{},history:[]};
+}
+
+function loadData(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if(!saved || typeof saved!=="object")return emptyData();
+
+  return {
+   total:Number.isSafeInteger(saved.total)&&saved.total>=0
+    ?saved.total:0,
+   tickets:TYPES.map((_,i)=>{
+    const n=saved.tickets?.[i];
+    return Number.isSafeInteger(n)&&n>=0?n:0;
+   }),
+   owned:saved.owned&&typeof saved.owned==="object"
+    ?saved.owned:{},
+   history:Array.isArray(saved.history)?saved.history:[]
+  };
+ }catch(e){return emptyData();}
+}
+
+function persist(){
+ try{
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+  return true;
+ }catch(e){return false;}
+}
+
+function money(n){return n.toLocaleString("ko-KR")+"원";}
+function ticketTotal(){return data.tickets.reduce((a,b)=>a+b,0);}
+function ownedCount(){
+ return characters.filter(c=>(data.owned[c.id]||0)>0).length;
+}
+
+// ========================================
+// 3. 화면 전환
+// ========================================
+
+function showPage(id){
+ document.querySelectorAll(".page").forEach(p=>{
+  p.classList.toggle("active",p.id===id);
+ });
+ document.querySelectorAll(".nav").forEach(b=>{
+  b.classList.toggle("active",b.dataset.page===id);
+ });
+ render();
+}
+
+document.querySelectorAll(".nav").forEach(b=>{
+ b.addEventListener("click",()=>showPage(b.dataset.page));
+});
+
+// ========================================
+// 4. 화면 갱신
+// ========================================
+
+function render(){
+ document.getElementById("totalMoney").textContent=money(data.total);
+ document.getElementById("totalTickets").textContent=ticketTotal()+"장";
+ document.getElementById("collectionCount").textContent=
+  ownedCount()+"/"+characters.length;
+
+ renderTickets();
+ renderHistory();
+ renderOptions();
+ renderCollection();
+}
+
+function renderTickets(){
+ const box=document.getElementById("ticketSummary");
+ box.replaceChildren();
+
+ TYPES.forEach((t,i)=>{
+  const div=document.createElement("div");
+  div.className="ticket";
+
+  const title=document.createElement("div");
+  title.textContent=t.icon+" "+t.name;
+
+  const count=document.createElement("strong");
+  count.textContent=data.tickets[i]+"장";
+
+  const range=document.createElement("div");
+  range.className="small";
+  range.textContent=i===3?"5,001원 이상":
+   t.min.toLocaleString()+"~"+t.max.toLocaleString()+"원";
+
+  div.append(title,count,range);
+  box.appendChild(div);
+ });
+}
+
+function renderHistory(){
+ const ul=document.getElementById("history");
+ ul.replaceChildren();
+
+ if(!data.history.length){
+  const li=document.createElement("li");
+  li.textContent="아직 저축 기록이 없어요!";
+  ul.appendChild(li);
+  return;
+ }
+
+ data.history.forEach(h=>{
+  if(!h||!Number.isSafeInteger(h.amount)||h.amount<=0||
+     !TYPES[h.type])return;
+
+  const li=document.createElement("li");
+  const a=document.createElement("span");
+  const b=document.createElement("strong");
+
+  a.textContent=String(h.date)+" · "+TYPES[h.type].name;
+  b.textContent="+"+money(h.amount);
+  li.append(a,b);
+  ul.appendChild(li);
+ });
+}
+
+// ========================================
+// 5. 저축
+// ========================================
+
+function saveMoney(){
+ const input=document.getElementById("amount");
+ const msg=document.getElementById("saveMessage");
+ const raw=input.value.trim();
+ const amount=Number(raw);
+
+ if(raw===""||!Number.isSafeInteger(amount)||amount<1){
+  msg.textContent="⚠️ 1원 이상의 정수 금액을 입력해 주세요.";
+  return;
+ }
+
+ if(!Number.isSafeInteger(data.total+amount)){
+  msg.textContent="⚠️ 누적 금액이 너무 큽니다.";
+  return;
+ }
+
+ const type=TYPES.findIndex(t=>amount>=t.min&&amount<=t.max);
+ if(type<0||!Number.isSafeInteger(data.tickets[type]+1)){
+  msg.textContent="⚠️ 금액을 확인해 주세요.";
+  return;
+ }
+
+ const previous=JSON.stringify(data);
+
+ data.total+=amount;
+ data.tickets[type]++;
+ data.history.unshift({
+  amount,type,date:new Date().toLocaleString("ko-KR")
+ });
+ data.history=data.history.slice(0,1000);
+
+ if(!persist()){
+  data=JSON.parse(previous);
+  msg.textContent="⚠️ 저장하지 못했어요.";
+  return;
+ }
+
+ msg.textContent="🎉 "+money(amount)+" 저축 성공! "+
+  TYPES[type].name+" 뽑기권 1장 획득!";
+
+ input.value="";
+ render();
+}
+
+document.getElementById("saveBtn").addEventListener("click",saveMoney);
+document.getElementById("amount").addEventListener("keydown",e=>{
+ if(e.key==="Enter")saveMoney();
+});
+
+// ========================================
+// 6. 뽑기권 선택
+// ========================================
+
+function renderOptions(){
+ const box=document.getElementById("gachaOptions");
+ box.replaceChildren();
+
+ TYPES.forEach((t,i)=>{
+  const btn=document.createElement("button");
+  btn.className="option"+(selectedType===i?" selected":"");
+  btn.setAttribute("aria-pressed",selectedType===i);
+
+  const icon=document.createElement("div");
+  icon.style.fontSize="28px";
+  icon.textContent=t.icon;
+
+  const title=document.createElement("strong");
+  title.textContent=t.name+" 뽑기";
+
+  const count=document.createElement("div");
+  count.className="small";
+  count.textContent=data.tickets[i]+"장 보유";
+
+  btn.append(icon,title,count);
+
+  btn.onclick=()=>{
+   selectedType=i;
+   document.getElementById("gachaMessage").textContent="";
+   renderOptions();
+  };
+
+  box.appendChild(btn);
+ });
+
+ document.getElementById("drawBtn").disabled=
+  !imagesReady||data.tickets[selectedType]<=0;
+}
+
+// ========================================
+// 7. 확률 뽑기
+// ========================================
+
+function drawCharacter(){
+ const msg=document.getElementById("gachaMessage");
+
+ if(!imagesReady){
+  msg.textContent="⚠️ 이미지를 불러오지 못했어요.";
+  return;
+ }
+
+ if(data.tickets[selectedType]<=0){
+  msg.textContent="⚠️ 뽑기권이 부족해요!";
+  return;
+ }
+
+ if(!characters.length){
+  msg.textContent="⚠️ 등록된 캐릭터가 없어요!";
+  return;
+ }
+
+ const weights=PROBABILITIES[selectedType].map((p,i)=>
+  characters.some(c=>c.type===i)?p:0
+ );
+
+ const totalWeight=weights.reduce((a,b)=>a+b,0);
+ if(totalWeight<=0){
+  msg.textContent="⚠️ 뽑을 캐릭터가 없어요.";
+  return;
+ }
+
+ let roll=Math.random()*totalWeight;
+ let grade=-1;
+
+ for(let i=0;i<4;i++){
+  roll-=weights[i];
+  if(roll<0){
+   grade=i;
+   break;
+  }
+ }
+
+ if(grade<0){
+  grade=weights.findLastIndex(w=>w>0);
+ }
+
+ const pool=characters.filter(c=>c.type===grade);
+ const character=pool[Math.floor(Math.random()*pool.length)];
+
+ const previous=JSON.stringify(data);
+ const isNew=!(data.owned[character.id]>0);
+
+ data.tickets[selectedType]--;
+ data.owned[character.id]=(data.owned[character.id]||0)+1;
+
+ if(!persist()){
+  data=JSON.parse(previous);
+  msg.textContent="⚠️ 결과 저장 실패!";
+  return;
+ }
+
+ const result=document.getElementById("resultImage");
+ result.replaceChildren();
+ result.className="";
+
+ const img=document.createElement("img");
+ img.src=character.url;
+ img.alt=character.name;
+ result.appendChild(img);
+
+ document.getElementById("resultName").textContent=
+  character.name+" 등장!";
+
+ document.getElementById("resultGrade").textContent=
+  TYPES[character.type].icon+" "+TYPES[character.type].name+" 등급";
+
+ msg.textContent=isNew?
+  "🎊 새로운 캐릭터 발견! 도감에 등록했어요!":
+  "💕 중복 캐릭터 획득! 수집 개수 +1";
+
+ render();
+}
+
+document.getElementById("drawBtn")
+ .addEventListener("click",drawCharacter);
+
+// ========================================
+// 8. 도감
+// ========================================
+
+function renderCollection(){
+ const grid=document.getElementById("collectionGrid");
+ grid.replaceChildren();
+
+ const count=ownedCount();
+ const total=characters.length;
+
+ document.getElementById("progressText").textContent=
+  count+" / "+total+" 발견 ("+
+  (total?Math.round(count/total*100):0)+"%)";
+
+ document.getElementById("progressFill").style.width=
+  (total?count/total*100:0)+"%";
+
+ if(!total){
+  const p=document.createElement("p");
+  p.textContent="등록된 캐릭터가 없어요. images.json을 확인해 주세요!";
+  grid.appendChild(p);
+  return;
+ }
+
+ [...characters].sort((a,b)=>a.id-b.id).forEach(c=>{
+  const owned=Number(data.owned[c.id])||0;
+  const card=document.createElement("div");
+  card.className="character-card"+(owned?"":" locked");
+
+  const img=document.createElement("img");
+  img.src=c.url;
+  img.alt=owned?c.name:"미발견 캐릭터";
+
+  const name=document.createElement("div");
+  name.className="char-name";
+  name.textContent=owned?c.name:"???";
+
+  const info=document.createElement("div");
+  info.className="small";
+  info.textContent="#"+String(c.id).padStart(2,"0")+
+   " · "+TYPES[c.type].name+
+   (owned?" · "+owned+"개":"");
+
+  card.append(img,name,info);
+  grid.appendChild(card);
+ });
+}
+
+// ========================================
+// 9. 파일 이름 자동 분석
+// ========================================
+
+function parseFilename(filename){
+ const match=filename.match(
+  /^(\d+)\s+(.+?)\s+(보통|희귀|좋은|전설)\.(png|jpg|jpeg|webp|gif)$/i
+ );
+
+ if(!match)return null;
+
+ const id=Number(match[1]);
+ const name=match[2].trim();
+ const type=TYPES.findIndex(t=>t.name===match[3]);
+
+ if(!Number.isSafeInteger(id)||id<1||!name||type<0)return null;
+
+ return {id,name,type};
+}
+
+// ========================================
+// 10. JSON 이미지 자동 불러오기
+// ========================================
+
+async function loadCharacters(){
+ const response=await fetch("./images/images.json",{cache:"no-store"});
+
+ if(!response.ok){
+  throw new Error("images.json을 찾을 수 없습니다.");
+ }
+
+ const filenames=await response.json();
+
+ if(!Array.isArray(filenames)){
+  throw new Error("JSON은 파일 이름 배열이어야 합니다.");
+ }
+
+ const list=[];
+ const usedIds=new Set();
+
+ for(const filename of filenames){
+  if(typeof filename!=="string")continue;
+
+  const info=parseFilename(filename);
+  if(!info||usedIds.has(info.id))continue;
+
+  usedIds.add(info.id);
+
+  list.push({
+   id:info.id,
+   name:info.name,
+   type:info.type,
+   url:"./images/"+encodeURIComponent(filename)
+  });
+ }
+
+ list.sort((a,b)=>a.id-b.id);
+ return list;
+}
+
+// ========================================
+// 11. 최초 실행
+// ========================================
+
+async function init(){
+ try{
+  characters=await loadCharacters();
+  imagesReady=true;
+ }catch(e){
+  imagesReady=false;
+  document.getElementById("gachaMessage").textContent=
+   "⚠️ 이미지 목록을 불러오지 못했어요. "+
+   "images.json과 실행 환경을 확인해 주세요.";
+ }
+ render();
+}
+
+render();
+init();
+
+</script>
+</body>
+</html>
