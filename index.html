@@ -818,6 +818,57 @@ async function init(){
 
 render();
 init();
+  // ========================================
+// 전체 데이터 리셋 기능
+// ========================================
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+
+  const confirmed = confirm(
+    "⚠️ 정말 모든 데이터를 초기화하시겠습니까?\n\n" +
+    "💰 저축 금액 및 기록 삭제\n" +
+    "🎟️ 뽑기권 전체 삭제\n" +
+    "📖 캐릭터 도감 수집 기록 삭제\n\n" +
+    "초기화한 데이터는 복구할 수 없습니다."
+  );
+
+  if (!confirmed) return;
+
+  // 브라우저에 저장된 게임 데이터 삭제
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    alert("저장된 데이터를 삭제하지 못했습니다.");
+    return;
+  }
+
+  // 현재 실행 중인 게임 데이터 초기화
+  data = emptyData();
+  selectedType = 0;
+
+  // 뽑기 결과 화면 초기화
+  const result = document.getElementById("resultImage");
+  result.replaceChildren();
+  result.className = "placeholder";
+  result.textContent = "🎁";
+
+  document.getElementById("resultName").textContent =
+    "어떤 친구가 나올까요?";
+
+  document.getElementById("resultGrade").textContent =
+    "두근두근!";
+
+  // 입력창 및 메시지 초기화
+  document.getElementById("amount").value = "";
+  document.getElementById("saveMessage").textContent = "";
+  document.getElementById("gachaMessage").textContent = "";
+
+  // 전체 화면 업데이트
+  render();
+  showPage("saving");
+
+  alert("✅ 모든 저축 기록과 도감이 초기화되었습니다!");
+});
 
 </script>
 </body>
