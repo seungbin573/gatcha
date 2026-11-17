@@ -7,6 +7,40 @@
 <title>돈 모으고 가챠</title>
 
 <style>
+.reset-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1000;
+
+  background: white;
+  color: #e6504b;
+  border: 2px solid #e6504b;
+  border-radius: 12px;
+
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+
+  cursor: pointer;
+  box-shadow: 0 4px 12px #00000020;
+  transition: 0.2s;
+}
+
+.reset-btn:hover {
+  background: #e6504b;
+  color: white;
+  transform: scale(1.05);
+}
+
+@media (max-width: 600px) {
+  .reset-btn {
+    top: 8px;
+    left: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
 :root{
  --red:#f45e59;
  --orange:#ffa24c;
@@ -236,6 +270,9 @@ input{
 </head>
 
 <body>
+<button id="resetBtn" class="reset-btn">
+  🔄 전체 리셋
+</button>
 <header>
 <h1>🐷 돈 모으고 가챠 🎁</h1>
 <p>저축하고 뽑고, 나만의 도감을 완성하자!</p>
